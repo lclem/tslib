@@ -29,16 +29,24 @@ static int button_palette[6] = {
 
 void button_draw(struct ts_button *button)
 {
-	int s = (button->flags & BUTTON_ACTIVE) ? 3 : 0;
+	if (button->visible) {
+		int s = (button->flags & BUTTON_ACTIVE) ? 3 : 0;
 
-	rect(button->x, button->y, button->x + button->w,
-	     button->y + button->h, button_palette[s]);
-	fillrect(button->x + 1, button->y + 1,
-		 button->x + button->w - 2,
-		 button->y + button->h - 2, button_palette[s + 1]);
-	put_string_center(button->x + button->w / 2,
-			  button->y + button->h / 2,
-			  button->text, button_palette[s + 2]);
+		rect(button->x, button->y, button->x + button->w,
+			button->y + button->h, button_palette[s]);
+		fillrect(button->x + 1, button->y + 1,
+			button->x + button->w - 2,
+			button->y + button->h - 2, button_palette[s + 1]);
+		put_string_center(button->x + button->w / 2,
+				button->y + button->h / 2,
+				button->text, button_palette[s + 2]);
+	}
+	else {
+		// draw a black rectangle if invisible
+		fillrect(button->x, button->y, button->x + button->w,
+			button->y + button->h, 0);
+
+	}
 }
 
 int button_handle(struct ts_button *button, int x, int y, unsigned int p)
@@ -47,22 +55,23 @@ int button_handle(struct ts_button *button, int x, int y, unsigned int p)
 		     (x < button->x + button->w) &&
 		     (y < button->y + button->h);
 
-	if (p > 0) {
-		if (inside) {
-			if (!(button->flags & BUTTON_ACTIVE)) {
-				button->flags |= BUTTON_ACTIVE;
+	if (button->visible) {
+		if (p > 0) {
+			if (inside) {
+				if (!(button->flags & BUTTON_ACTIVE)) {
+					button->flags |= BUTTON_ACTIVE;
+					button_draw(button);
+				}
+			} else if (button->flags & BUTTON_ACTIVE) {
+				button->flags &= ~BUTTON_ACTIVE;
 				button_draw(button);
 			}
 		} else if (button->flags & BUTTON_ACTIVE) {
 			button->flags &= ~BUTTON_ACTIVE;
 			button_draw(button);
+			return 1;
 		}
-	} else if (button->flags & BUTTON_ACTIVE) {
-		button->flags &= ~BUTTON_ACTIVE;
-		button_draw(button);
-		return 1;
 	}
-
 	return 0;
 }
 

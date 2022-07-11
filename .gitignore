@@ -44,3 +44,4 @@ compile
 *.exe
 INSTALL
 tags
+.DS_Store

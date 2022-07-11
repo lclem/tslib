@@ -22,7 +22,9 @@
 struct ts_button {
 	int x, y, w, h;
 	char *text;
+	char *secondaryText;
 	int flags;
+	int visible;
 #define BUTTON_ACTIVE 0x00000001
 };
 
